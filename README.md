@@ -5,7 +5,9 @@
 
 ## Plan
 
-- [ ] Test the scene in blender to check the sim2real gap.
+- [ ] Draw BBOX
+- [ ] Fix the bugs in coordination.
+- [ ] Generate axis information in dict.
 
 ## Trouble Shoot
 

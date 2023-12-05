@@ -32,7 +32,7 @@
 		<axis xyz="0 0 -1"/>
 		<child link="link_0"/>
 		<parent link="link_4"/>
-		<limit lower="-0.6094689747964199" upper="0.28274333882308117"/>
+		<limit effort="30" lower="-0.6094689747964199" upper="0.28274333882308117"/>
 	</joint>
 	<link name="link_1">
 		<visual name="lid-2">
@@ -89,7 +89,7 @@
 		<axis xyz="0 1 0"/>
 		<child link="link_1"/>
 		<parent link="link_4"/>
-		<limit lower="0" upper="0.03600000000000003"/>
+		<limit effort="30" lower="0" upper="0.03600000000000003"/>
 	</joint>
 	<link name="link_2">
 		<visual name="lid-3">
@@ -458,7 +458,7 @@
 		<axis xyz="0 1 0"/>
 		<child link="link_2"/>
 		<parent link="link_4"/>
-		<limit lower="0" upper="0.01"/>
+		<limit effort="30" lower="0" upper="0.01"/>
 	</joint>
 	<link name="link_3">
 		<visual name="knob-4">

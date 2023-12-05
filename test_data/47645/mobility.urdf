@@ -20,7 +20,7 @@
 		<axis xyz="-1 0 0"/>
 		<child link="link_0"/>
 		<parent link="link_1"/>
-		<limit lower="0.0" upper="3.141592653589793"/>
+		<limit effort="30" velocity="1.0" lower="0.0" upper="3.141592653589793"/>
 	</joint>
 	<link name="link_1">
 		<visual name="other_leaf-23">

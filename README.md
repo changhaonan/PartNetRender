@@ -5,10 +5,14 @@
 
 ## Plan
 
-- [ ] Draw BBOX
-- [ ] Fix the bugs in coordination.
-- [ ] Generate axis information in dict.
+- [ ] Locate the joint.
+- [ ] Script to fix urdf.
+
 
 ## Trouble Shoot
 
 1. If install `yurdfpy` has problem, check this [https://blender.stackexchange.com/questions/81740/python-h-missing-in-blender-python]()
+
+
+## Limitation
+1. We currently only support 1 layer of link.

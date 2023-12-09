@@ -1,6 +1,7 @@
 import blenderproc as bproc
 import bpy
 import os
+import argparse
 import json
 import numpy as np
 from blenderproc.python.writer.BopWriterUtility import _BopWriterUtility
@@ -8,34 +9,39 @@ from blenderproc.python.writer.BopWriterUtility import _BopWriterUtility
 # debugpy.listen(5678)
 # debugpy.wait_for_client()
 
-
-# -------------------------- Utils Functions -------------------------- #
-
-
 # -------------------------- Main -------------------------- #
-bproc.init()
-# Override engine
-# bpy.context.scene.render.engine = 'BLENDER_EEVEE'
-# Load the URDF file
-output_dir = 'output'
-data_name = '100162'
+argparser = argparse.ArgumentParser()
+argparser.add_argument('--data_name', type=str, default='100162')
+argparser.add_argument('--output_dir', type=str, default='output')
+argparser.add_argument('--num_poses', type=int, default=10)
+argparser.add_argument('--light_radius_min', type=float, default=3.0)
+argparser.add_argument('--light_radius_max', type=float, default=5.0)
+argparser.add_argument('--cam_radius_min', type=float, default=3.0)
+argparser.add_argument('--cam_radius_max', type=float, default=5.0)
+args = argparser.parse_args()
+
+# Set parameters
+output_dir = args.output_dir
+data_name = args.data_name
 data_file = f'test_data/{data_name}/mobility.urdf'
-num_poses = 10
-light_radius_min = 3.0
-light_radius_max = 5.0
-cam_radius_min = 3.0
-cam_radius_max = 5.0
-rot_scale = 0.3
+num_poses = args.num_poses
+light_radius_min = args.light_radius_min
+light_radius_max = args.light_radius_max
+cam_radius_min = args.cam_radius_min
+cam_radius_max = args.cam_radius_max
+
 robot_pose = np.eye(4).tolist()
 cam_poses = []
 
+# -------------------------- Init & Load -------------------------- #
+bproc.init()
 # Load URDF mesh into scene
 robot = bproc.loader.load_urdf(data_file)
 # Randomly rotatet the robot
 revolute_joints = robot.get_links_with_revolute_joints()
 num_revolute_joints = len(revolute_joints)
-random_rotations = np.random.uniform(0.0, 1.0, num_revolute_joints).tolist()  # FIXME: how to set a better range?
-robot.set_rotation_euler_fk(link=None, rotation_euler=random_rotations)
+# random_rotations = np.random.uniform(0.0, 1.0, num_revolute_joints).tolist()  # FIXME: how to set a better range?
+# robot.set_rotation_euler_fk(link=None, rotation_euler=random_rotations)
 
 # -------------------------- Semantic -------------------------- #
 mesh_objs = []
@@ -45,12 +51,6 @@ for idx_link, link in enumerate(robot.links):
     for visual in link.visuals:
         visual.set_cp("category_id", idx_link + 1)
         link_objs.append(visual)
-    # if link_objs:
-    #     # join all objects in this link
-    #     link_obj = link_objs[0]
-    #     if len(link_objs) > 1:
-    #         link_obj.join_with_other_objects(link_objs[1:])
-    #     mesh_objs.append(link_obj)
     mesh_objs += link_objs
     if link_objs:
         link_rep_objs.append(link_objs[0])
@@ -150,3 +150,7 @@ with open(os.path.join(output_dir, 'coco_data', data_name, 'poses_info.json'), '
 # Copy joint file
 joint_file = f'test_data/{data_name}/mobility_v2.json'
 os.system(f'cp {joint_file} {os.path.join(output_dir, "coco_data", data_name)}')
+
+# Copy point cloud file
+pcd_file = f'test_data/{data_name}/point_sample/ply-10000.ply'
+os.system(f'cp {pcd_file} {os.path.join(output_dir, "coco_data", data_name)}')

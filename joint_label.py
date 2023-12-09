@@ -3,6 +3,8 @@ import json
 import os
 import cv2
 import numpy as np
+import argparse
+import open3d as o3d
 
 
 class JointLabler:
@@ -12,9 +14,10 @@ class JointLabler:
         self.joint_info = None
         self.cam_info = None
         self.poses_info = None
+        self.pcd = None
         self.joint_dict = {}
 
-    def read_info(self, info_file, cam_info_file, poses_info_file):
+    def read_info(self, info_file, cam_info_file, poses_info_file, pcd_file=None):
         """Read joint information from file"""
         with open(info_file, 'r') as f:
             self.joint_info = json.load(f)
@@ -23,6 +26,8 @@ class JointLabler:
             self.cam_info = json.load(f)
         with open(poses_info_file, 'r') as f:
             self.poses_info = json.load(f)
+        with open(pcd_file, 'r') as f:
+            self.pcd = o3d.io.read_point_cloud(pcd_file)
 
     def parse_joint_info(self):
         """Parse joint information"""
@@ -96,7 +101,7 @@ class JointLabler:
                 joint_neg_point_pixel = joint_neg_point[:2] / joint_neg_point[2]
                 joint_neg_point_pixel[0] = -joint_neg_point_pixel[0] * self.cam_info['fx'] + self.cam_info['cx']
                 joint_neg_point_pixel[1] = joint_neg_point_pixel[1] * self.cam_info['fy'] + self.cam_info['cy']
-                
+
                 # Draw joint line
                 image = cv2.line(image, tuple(joint_pos_point_pixel.astype(np.int32)), tuple(joint_neg_point_pixel.astype(np.int32)), (0, 255, 0), 2)
                 image = cv2.circle(image, tuple(joint_pos_point_pixel.astype(np.int32)), 5, (255, 0, 0), -1)
@@ -104,20 +109,32 @@ class JointLabler:
                 # Draw joint origin
                 image = cv2.circle(image, tuple(joint_origin_pixel.astype(np.int32)), 5, (0, 255, 0), -1)
         return image
+    
+    def show_point_cloud(self):
+        if self.pcd is not None:
+            o3d.visualization.draw_geometries([self.pcd])
 
 
 if __name__ == "__main__":
-    data_name = '100162'  # '102145', '47645', '100162'
-    data_folder = os.path.join('output', 'coco_data', data_name)
+    # Parse arguments
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('--data_name', type=str, default='102145')
+    argparser.add_argument('--output_dir', type=str, default='output')
+    args = argparser.parse_args()
+
+    data_name = args.data_name
+    data_folder = os.path.join(args.output_dir, 'coco_data', data_name)
     data_file = f'test_data/{data_name}/mobility.urdf'
+    pcd_file = os.path.join(data_folder, 'ply-10000.ply')
     info_file = os.path.join(data_folder, 'mobility_v2.json')
     poses_file = os.path.join(data_folder, 'poses_info.json')
     cam_info_file = os.path.join(data_folder, 'camera.json')
 
     # Init joint labeler
     joint_labeler = JointLabler()
-    joint_labeler.read_info(info_file, cam_info_file, poses_file)
+    joint_labeler.read_info(info_file, cam_info_file, poses_file, pcd_file)
 
     # Start labeling
     image_folder = os.path.join(data_folder, 'images')
     joint_labeler.label_images(image_folder)
+    joint_labeler.show_point_cloud()

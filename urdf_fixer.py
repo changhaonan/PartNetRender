@@ -1,4 +1,5 @@
 import re
+import os
 
 
 def modify_urdf(file_path):
@@ -17,5 +18,8 @@ def modify_urdf(file_path):
         file.writelines(modified_lines)
 
 
-data_name = '100162'
-modify_urdf(f'test_data/{data_name}/mobility.urdf')
+if __name__ == '__main__':
+    folder_path = 'test_data'
+    for data_name in os.listdir(folder_path):
+        if os.path.isdir(os.path.join(folder_path, data_name)):
+            modify_urdf(f'{folder_path}/{data_name}/mobility.urdf')

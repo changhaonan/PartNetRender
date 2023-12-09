@@ -4,7 +4,7 @@
 
 ## How to use
 
-1. Adapth the newly downloaded `URDF` file. (Only run it once.)
+1. Adapt the newly downloaded `URDF` file. (Only run it once.)
 ```
 python urdf_fixer.py
 ```

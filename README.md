@@ -6,7 +6,7 @@
 
 1. Adapt the newly downloaded `URDF` file. (Only run it once.)
 ```
-python urdf_fixer.py
+python urdf_fixer.py --data_dir=${data_dir}
 ```
  
 1. Rendering image first.

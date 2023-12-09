@@ -1,12 +1,18 @@
 # Dependency
 
-- Yourdfpy [https://github.com/clemense/yourdfpy]()
 - BlenderProc [https://github.com/DLR-RM/BlenderProc]()
 
-## Plan
+## How to use
 
-- [ ] Locate the joint.
-- [ ] Script to fix urdf.
+1. Rendering image first.
+```
+blenderproc run render_robot.py
+```
+
+2. Label the image
+```
+python joint_label.py
+```
 
 
 ## Trouble Shoot

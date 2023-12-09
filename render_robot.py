@@ -14,11 +14,15 @@ from blenderproc.python.writer.BopWriterUtility import _BopWriterUtility
 
 # -------------------------- Main -------------------------- #
 bproc.init()
+# Override engine
+# bpy.context.scene.render.engine = 'BLENDER_EEVEE'
 # Load the URDF file
 output_dir = 'output'
 data_name = '100162'
 data_file = f'test_data/{data_name}/mobility.urdf'
 num_poses = 10
+light_radius_min = 3.0
+light_radius_max = 5.0
 cam_radius_min = 3.0
 cam_radius_max = 5.0
 rot_scale = 0.3
@@ -52,10 +56,17 @@ for idx_link, link in enumerate(robot.links):
         link_rep_objs.append(link_objs[0])
 
 # -------------------------- Light -------------------------- #
-light_point = bproc.types.Light()
+# Background light
+light_background = bproc.types.Light(light_type="SUN")
+light_background.set_energy(5)
+light_background.set_color(np.random.uniform([0.5, 0.5, 0.5], [1, 1, 1]))
+light_background.set_location([np.random.random(), np.random.random(), 10])
+
+# Point light
+light_point = bproc.types.Light(light_type="POINT")
 light_point.set_energy(200)
 light_point.set_color(np.random.uniform([0.5, 0.5, 0.5], [1, 1, 1]))
-location = bproc.sampler.shell(center=[0, 0, 0], radius_min=1, radius_max=1.5,
+location = bproc.sampler.shell(center=[0, 0, 0], radius_min=light_radius_min, radius_max=light_radius_max,
                                elevation_min=5, elevation_max=89, uniform_volume=False)
 light_point.set_location(location)
 
@@ -94,10 +105,14 @@ while poses < num_poses:
 # -------------------------- Render & Save -------------------------- #
 bproc.renderer.enable_depth_output(activate_antialiasing=False)
 # enable segmentation masks (per class and per instance)
-bproc.renderer.enable_segmentation_output(map_by=["category_id", "instance", "name"])
+bproc.renderer.enable_segmentation_output(map_by=["category_id", "instance"])
 
-# Render the scene
-data = bproc.renderer.render()
+# Render the segmentation under Cycles engine
+bpy.context.scene.render.engine = 'CYCLES'
+data = bproc.renderer.render(load_keys={'segmap'})
+# Render color and depth under Eevee engine
+bpy.context.scene.render.engine = 'BLENDER_EEVEE'
+data.update(bproc.renderer.render(load_keys={'colors', 'depth'}))
 
 # # Write the rendering into an hdf5 file
 # bproc.writer.write_hdf5(output_dir, data)

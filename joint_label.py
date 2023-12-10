@@ -17,7 +17,7 @@ class JointLabler:
         self.pcd = None
         self.joint_dict = {}
 
-    def read_info(self, info_file, cam_info_file, poses_info_file, pcd_file=None):
+    def read_info(self, info_file, cam_info_file, poses_info_file, ply_file=None):
         """Read joint information from file"""
         with open(info_file, 'r') as f:
             self.joint_info = json.load(f)
@@ -26,8 +26,8 @@ class JointLabler:
             self.cam_info = json.load(f)
         with open(poses_info_file, 'r') as f:
             self.poses_info = json.load(f)
-        with open(pcd_file, 'r') as f:
-            self.pcd = o3d.io.read_point_cloud(pcd_file)
+        with open(ply_file, 'r') as f:
+            self.pcd = o3d.io.read_triangle_mesh(ply_file)
 
     def parse_joint_info(self):
         """Parse joint information"""
@@ -45,6 +45,19 @@ class JointLabler:
                     "id": id,
                     "parent": parent,
                     "type": "hinge",
+                    "axis_origin": axis_origin,
+                    "axis_direction": axis_direction
+                }
+            elif joint_data["joint"] == "slider":
+                axis_origin = np.array(joint_data["jointData"]["axis"]["origin"])
+                axis_direction = np.array(joint_data["jointData"]["axis"]["direction"])
+                # Convert y-up to z-up
+                axis_origin = np.array([-axis_origin[2], -axis_origin[0], axis_origin[1]])
+                axis_direction = np.array([-axis_direction[2], -axis_direction[0], axis_direction[1]])
+                self.joint_dict[id] = {
+                    "id": id,
+                    "parent": parent,
+                    "type": "slider",
                     "axis_origin": axis_origin,
                     "axis_direction": axis_direction
                 }
@@ -77,7 +90,7 @@ class JointLabler:
         # world2camera = camera_pose
         # project all joints to image
         for joint_id, joint_data in self.joint_dict.items():
-            if joint_data['type'] == 'hinge':
+            if joint_data['type'] == 'hinge' or joint_data['type'] == 'slider':
                 # Get joint origin & direction
                 joint_origin = np.array(joint_data['axis_origin'])
                 joint_direction = np.array(joint_data['axis_direction'])
@@ -109,7 +122,7 @@ class JointLabler:
                 # Draw joint origin
                 image = cv2.circle(image, tuple(joint_origin_pixel.astype(np.int32)), 5, (0, 255, 0), -1)
         return image
-    
+
     def show_point_cloud(self):
         if self.pcd is not None:
             o3d.visualization.draw_geometries([self.pcd])
@@ -125,14 +138,14 @@ if __name__ == "__main__":
     data_name = args.data_name
     data_folder = os.path.join(args.output_dir, 'coco_data', data_name)
     data_file = f'test_data/{data_name}/mobility.urdf'
-    pcd_file = os.path.join(data_folder, 'ply-10000.ply')
+    ply_file = os.path.join(data_folder, 'collision_obj.ply')
     info_file = os.path.join(data_folder, 'mobility_v2.json')
     poses_file = os.path.join(data_folder, 'poses_info.json')
     cam_info_file = os.path.join(data_folder, 'camera.json')
 
     # Init joint labeler
     joint_labeler = JointLabler()
-    joint_labeler.read_info(info_file, cam_info_file, poses_file, pcd_file)
+    joint_labeler.read_info(info_file, cam_info_file, poses_file, ply_file)
 
     # Start labeling
     image_folder = os.path.join(data_folder, 'images')

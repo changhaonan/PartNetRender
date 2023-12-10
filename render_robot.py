@@ -151,6 +151,14 @@ with open(os.path.join(output_dir, 'coco_data', data_name, 'poses_info.json'), '
 joint_file = f'test_data/{data_name}/mobility_v2.json'
 os.system(f'cp {joint_file} {os.path.join(output_dir, "coco_data", data_name)}')
 
-# Copy point cloud file
-pcd_file = f'test_data/{data_name}/point_sample/ply-10000.ply'
-os.system(f'cp {pcd_file} {os.path.join(output_dir, "coco_data", data_name)}')
+# Export ply file
+all_mesh_objs = robot.get_all_collision_objs()
+# join all meshes
+merged_mesh_objs = all_mesh_objs[0]
+merged_mesh_objs.join_with_other_objects(all_mesh_objs[1:])
+# export to ply
+
+bpy.context.view_layer.objects.active = merged_mesh_objs.blender_obj
+export_ply_file = os.path.join(output_dir, 'coco_data', data_name, 'collision_obj.ply')
+# Export the selected object
+bpy.ops.export_mesh.ply(filepath=export_ply_file)

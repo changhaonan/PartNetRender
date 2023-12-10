@@ -22,9 +22,13 @@ def modify_urdf(file_path):
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
     argparser.add_argument('--data_dir', type=str, default='test_data')
+    argparser.add_argument('--data_name', type=str, default='')
     args = argparser.parse_args()
     folder_path = args.data_dir
 
-    for data_name in os.listdir(folder_path):
-        if os.path.isdir(os.path.join(folder_path, data_name)):
-            modify_urdf(f'{folder_path}/{data_name}/mobility.urdf')
+    if args.data_name:
+        modify_urdf(f'{folder_path}/{args.data_name}/mobility.urdf')
+    else:
+        for data_name in os.listdir(folder_path):
+            if os.path.isdir(os.path.join(folder_path, data_name)):
+                modify_urdf(f'{folder_path}/{data_name}/mobility.urdf')

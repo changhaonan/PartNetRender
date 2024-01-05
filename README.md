@@ -24,7 +24,8 @@ python joint_label.py --data_name=${data_id}
 blenderproc vis coco -b output/coco_data/${data_id}
 ```
 
-It will show as ![](media/coco_vis.png)
+It will show as 
+![](./media/coco_vis.png =100x20)
 
 
 ## Trouble Shoot

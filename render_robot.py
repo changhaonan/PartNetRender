@@ -5,9 +5,9 @@ import argparse
 import json
 import numpy as np
 from blenderproc.python.writer.BopWriterUtility import _BopWriterUtility
-import debugpy
-debugpy.listen(5678)
-debugpy.wait_for_client()
+# import debugpy
+# debugpy.listen(5678)
+# debugpy.wait_for_client()
 os.environ["OPENCV_IO_ENABLE_OPENEXR"]="1"
 
 # -------------------------- Main -------------------------- #

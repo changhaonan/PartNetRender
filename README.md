@@ -11,13 +11,20 @@ python urdf_fixer.py --data_dir=${data_dir}
  
 1. Rendering image first.
 ```
-blenderproc run render_robot.py --data_name=${data_id}
+blenderproc run render_robot.py --data_name=${data_id} --img_width=${width} --img_height=${height}
 ```
 
 2. Label the image
 ```
 python joint_label.py --data_name=${data_id}
 ```
+
+3. Visualize coco
+```
+blenderproc vis coco -b output/coco_data/${data_id}
+```
+
+It will show as ![](media/coco_vis.png)
 
 
 ## Trouble Shoot
@@ -27,3 +34,6 @@ python joint_label.py --data_name=${data_id}
 
 ## Limitation
 1. We currently only support 1 layer of link.
+
+## Note
+1. Joint name is now logged as its first part's name.

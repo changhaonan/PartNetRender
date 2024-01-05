@@ -25,8 +25,8 @@ blenderproc vis coco -b output/coco_data/${data_id}
 ```
 
 It will show as 
-![](./media/coco_vis.png =100x20)
 
+<img src="./media/coco_vis.png" width="200" height="200" />
 
 ## Trouble Shoot
 

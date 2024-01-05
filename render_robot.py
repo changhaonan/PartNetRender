@@ -5,9 +5,10 @@ import argparse
 import json
 import numpy as np
 from blenderproc.python.writer.BopWriterUtility import _BopWriterUtility
-# import debugpy
-# debugpy.listen(5678)
-# debugpy.wait_for_client()
+import debugpy
+debugpy.listen(5678)
+debugpy.wait_for_client()
+os.environ["OPENCV_IO_ENABLE_OPENEXR"]="1"
 
 # -------------------------- Main -------------------------- #
 argparser = argparse.ArgumentParser()
@@ -18,6 +19,9 @@ argparser.add_argument('--light_radius_min', type=float, default=3.0)
 argparser.add_argument('--light_radius_max', type=float, default=5.0)
 argparser.add_argument('--cam_radius_min', type=float, default=3.0)
 argparser.add_argument('--cam_radius_max', type=float, default=5.0)
+argparser.add_argument('--img_width', type=int, default=640)
+argparser.add_argument('--img_height', type=int, default=480)
+argparser.add_argument('--disable_top_sampling', action='store_true')
 args = argparser.parse_args()
 
 # Set parameters
@@ -49,7 +53,7 @@ link_rep_objs = []  # link representation objects
 for idx_link, link in enumerate(robot.links):
     link_objs = []  # all objects in this link
     for visual in link.visuals:
-        visual.set_cp("category_id", idx_link + 1)
+        visual.set_cp("category_id", idx_link)
         link_objs.append(visual)
     mesh_objs += link_objs
     if link_objs:
@@ -71,6 +75,9 @@ location = bproc.sampler.shell(center=[0, 0, 0], radius_min=light_radius_min, ra
 light_point.set_location(location)
 
 # -------------------------- Camera -------------------------- #
+# Set camera resolution
+bproc.camera.set_resolution(args.img_width, args.img_height)
+
 # BVH tree used for camera obstacle checks
 bop_bvh_tree = bproc.object.create_bvh_tree_multi_objects(mesh_objs)
 
@@ -84,6 +91,10 @@ while poses < num_poses:
                                    elevation_min=1,
                                    elevation_max=89,
                                    uniform_volume=False)
+    # Check if location too close to robot
+    if (np.abs(location[0]) < 0.3 * cam_radius_min) and (np.abs(location[1]) < 0.3 * cam_radius_min):
+        continue
+
     # Determine point of interest in scene as the object closest to the mean of a subset of objects
     poi = bproc.object.compute_poi(mesh_objs)
     # Compute rotation based on vector going from location towards poi
@@ -118,16 +129,28 @@ data.update(bproc.renderer.render(load_keys={'colors', 'depth'}))
 # bproc.writer.write_hdf5(output_dir, data)
 
 # Write data to coco file
+joint_file = f'test_data/{data_name}/mobility_v2.json'
+with open(joint_file, 'r') as f:
+    joint_info = json.load(f)
+
 # build a new instance_attribute_maps
 instance_attribute_maps = []
 for i in range(len(data["instance_segmaps"])):
     instance_attribute_maps.append([])
     for j in range(len(robot.links)):
+        # Use first part name as the link name
+        link_name = robot.links[j].blender_obj.name
+        if link_name == "base":
+            link_name = "base_link"
+        else:
+            link_id = int(link_name.split("_")[1])
+            link_name = joint_info[link_id]["parts"][0]["name"]
         instance_attribute_maps[i].append(
             {
                 "category_id": j,
                 "idx": j,
-                "name": f"link_{j}"
+                # "name": f"link_{j}"
+                "name": link_name
             }
         )
 
@@ -147,8 +170,8 @@ poses_info = {
 _BopWriterUtility.write_camera(os.path.join(output_dir, 'coco_data', data_name, 'camera.json'))
 with open(os.path.join(output_dir, 'coco_data', data_name, 'poses_info.json'), 'w') as f:
     json.dump(poses_info, f)
+
 # Copy joint file
-joint_file = f'test_data/{data_name}/mobility_v2.json'
 os.system(f'cp {joint_file} {os.path.join(output_dir, "coco_data", data_name)}')
 
 # Export ply file

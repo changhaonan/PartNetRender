@@ -150,4 +150,4 @@ if __name__ == "__main__":
     # Start labeling
     image_folder = os.path.join(data_folder, 'images')
     joint_labeler.label_images(image_folder)
-    joint_labeler.show_point_cloud()
+    # joint_labeler.show_point_cloud()

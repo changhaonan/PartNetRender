@@ -5,9 +5,9 @@ import argparse
 import json
 import numpy as np
 from blenderproc.python.writer.BopWriterUtility import _BopWriterUtility
-# import debugpy
-# debugpy.listen(5678)
-# debugpy.wait_for_client()
+import debugpy
+debugpy.listen(5678)
+debugpy.wait_for_client()
 
 # -------------------------- Main -------------------------- #
 argparser = argparse.ArgumentParser()
@@ -35,6 +35,7 @@ cam_poses = []
 
 # -------------------------- Init & Load -------------------------- #
 bproc.init()
+
 # Load URDF mesh into scene
 robot = bproc.loader.load_urdf(data_file)
 # Randomly rotatet the robot
@@ -153,9 +154,10 @@ os.system(f'cp {joint_file} {os.path.join(output_dir, "coco_data", data_name)}')
 
 # Export ply file
 all_mesh_objs = robot.get_all_collision_objs()
+# all_mesh_objs = robot.get_all_visual_objs()
 # join all meshes
-merged_mesh_objs = all_mesh_objs[0]
-merged_mesh_objs.join_with_other_objects(all_mesh_objs[1:])
+merged_mesh_objs = all_mesh_objs[1]
+# merged_mesh_objs.join_with_other_objects(all_mesh_objs[1:])
 # export to ply
 
 bpy.context.view_layer.objects.active = merged_mesh_objs.blender_obj

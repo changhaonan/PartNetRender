@@ -1,3 +1,7 @@
+# Parnet Renderer
+
+We render PartNet Mobility to 2D images to train 2D vision model. Dataset link [https://sapien.ucsd.edu/browse]()
+
 # Dependency
 
 - BlenderProc [https://github.com/DLR-RM/BlenderProc]()
@@ -19,6 +23,10 @@ blenderproc run render_robot.py --data_name=${data_id}
 python joint_label.py --data_name=${data_id}
 ```
 
+3. Check the result
+```
+blenderproc vis coco -b output/coco_data/${data_id}/
+```
 
 ## Trouble Shoot
 

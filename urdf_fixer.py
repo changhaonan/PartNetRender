@@ -60,5 +60,6 @@ if __name__ == "__main__":
         modify_urdf(f"{folder_path}/{args.data_name}/mobility.urdf")
     else:
         for data_name in os.listdir(folder_path):
+            print(f"Current process: {data_name}")
             if os.path.isdir(os.path.join(folder_path, data_name)):
                 modify_urdf(f"{folder_path}/{data_name}/mobility.urdf")

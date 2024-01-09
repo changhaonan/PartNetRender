@@ -2,3 +2,5 @@ output/*
 test_data/*
 examples/*
 test_data_bk/*
+.vscode/
+**.ipynb

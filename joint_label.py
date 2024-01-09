@@ -4,7 +4,12 @@ import os
 import cv2
 import numpy as np
 import argparse
-import open3d as o3d
+
+o3d = None
+try:
+    import open3d as o3d
+except:
+    print("open3d import error")
 
 
 class JointLabler:
@@ -26,8 +31,11 @@ class JointLabler:
             self.cam_info = json.load(f)
         with open(poses_info_file, "r") as f:
             self.poses_info = json.load(f)
-        with open(ply_file, "r") as f:
-            self.pcd = o3d.io.read_triangle_mesh(ply_file)
+            print(self.poses_info["robot_pose"])
+            
+        if ply_file and o3d:
+            with open(ply_file, "r") as f:
+                self.pcd = o3d.io.read_triangle_mesh(ply_file)
 
     def parse_joint_info(self):
         """Parse joint information"""
